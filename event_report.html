@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Event Report</title>
+
+    <!-- Bootstrap -->
+    <!--link href="css/bootstrap.min.css" rel="stylesheet"-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<!--link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha256-LA89z+k9fjgMKQ/kq4OO2Mrf8VltYml/VES+Rg0fh20=" crossorigin="anonymous" /-->
+  </head>
+  <body>
+
+<div class="container"><h1>Event Report</h1></div>
+<div id="exTab1" class="container">	
+	<ul  class="nav nav-pills">
+		<ul class="nav nav-tabs">
+		<li class="active"><a href="#1a" data-toggle="tab">Details</a></li>
+		<li ><a href="#1b" data-toggle="tab">Parameter Data</a></li>
+	</ul>
+
+	<div class="tab-content clearfix">
+		<div class="tab-pane active" id="1a">
+            <div class="col-xs-12" style="height:10px;"></div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div id="mapid" style="height: 500px;"></div>
+                </div>
+                <div class="col-sm-6">
+                    <h4>Info</h4>
+                    
+    <table id="table" class="table table-striped" data-show-header="false">
+    <thead>
+        <tr>
+            <th data-field="key">Detail Name</th>
+            <th data-field="value">Detail Value</th>
+        </tr>
+    </thead>
+    </table>
+                </div>
+            </div>
+		</div>
+		<div class="tab-pane" id="1b">
+			<h3>Parameter Data</h3>
+            <div id="select2test">
+                <select class="tagstypeahead" multiple="multiple" style="width: 75%"> </select>
+            </div>
+
+            <!-- oninput="tagInput()"-->
+            <div style="width: 100%; overflow: hidden;">
+              <div style="width:100%; float: left;">
+                  <canvas id="canvas"></canvas>
+              </div>
+            </div>
+        </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <!--script src="js/bootstrap.min.js"></script-->
+    <!--script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha256-5+02zu5UULQkO7w1GIr6vftCgMfFdZcAHeDtFnKZsBs=" crossorigin="anonymous"></script-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+   integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+   crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
+   integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
+   crossorigin=""></script>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+
+    <script>
+
+    var startPosition = [ 39.116, -94.61 ]; 
+    var stopPosition = [ 39.119, -94.59 ]; 
+   
+    var tableData = 
+        [
+            {"key": "Time",
+             "value": "2018-02-18T08:11:00"
+            },
+            {"key": "Unit",
+             "value": "GOR 1000"
+            }
+        ];
+
+    $(document).ready(function() {
+        $('#table').bootstrapTable(
+            {
+                data: tableData
+            }
+        );
+        $('#table').bootstrapTable('hideRow',0);
+    });
+ 
+
+var polygon = L.polyline([
+    [39.116,-94.61],
+    [39.117,-94.60],
+    [39.119,-94.59]
+], {color: 'red', dashArray: '5,5'});
+    
+    var mymap = L.map('mapid').setView( startPosition, 12);
+    polygon.addTo( mymap );
+
+    mymap.fitBounds( polygon.getBounds(), {maxZoom: 12} );
+
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(mymap);
+    var color = Chart.helpers.color;
+    var availableScatterData = new Object();
+
+    var scatterChartData = { datasets: 
+        [
+        ]
+        };
+
+     var geoText = '{ "type": "FeatureCollection", "features": [ { "type": "Feature", "properties": {}, "geometry": { "type": "Polygon", "coordinates": [ [ [ -94.58576202392578, 39.101291727840604 ], [ -94.57254409790039, 39.10342313168426 ], [ -94.57151412963867, 39.11447875488642 ], [ -94.58696365356445, 39.11914024482347 ], [ -94.59726333618164, 39.10768574604533 ], [ -94.58576202392578, 39.101291727840604 ] ] ] } } ] }';
+    //var geoText = '';
+
+    if( geoText.length > 0 )
+    {
+        var geoObj = JSON.parse( geoText );
+        L.geoJSON(geoObj).addTo(mymap);
+    }
+
+const greenColour = '#33cc33'
+const redColour = '#ff3300'
+
+const greenMarkerHtmlStyles = `
+  background-color: ${greenColour};
+  width: 3rem;
+  height: 3rem;
+  display: block;
+  left: -1.5rem;
+  top: -1.5rem;
+  position: relative;
+  border-radius: 3rem 3rem 0;
+  transform: rotate(45deg);
+  border: 1px solid #FFFFFF`
+
+const redMarkerHtmlStyles = `
+  background-color: ${redColour};
+  width: 3rem;
+  height: 3rem;
+  display: block;
+  left: -1.5rem;
+  top: -1.5rem;
+  position: relative;
+  border-radius: 3rem 3rem 0;
+  transform: rotate(45deg);
+  border: 1px solid #FFFFFF`
+
+const startIcon = L.divIcon({
+  className: "my-custom-pin",
+  iconAnchor: [0, 24],
+  labelAnchor: [-6, 0],
+  popupAnchor: [0, -36],
+  html: `<span style="${greenMarkerHtmlStyles}" />`
+})
+
+const stopIcon = L.divIcon({
+  className: "my-custom-pin",
+  iconAnchor: [0, 24],
+  labelAnchor: [-6, 0],
+  popupAnchor: [0, -36],
+  html: `<span style="${redMarkerHtmlStyles}" />`
+})
+
+    var marker = L.marker( startPosition, {icon: startIcon} ).addTo(mymap);
+    var marker = L.marker( stopPosition, {icon: stopIcon} ).addTo(mymap);
+
+	var rxData = 
+[
+{
+                "label": "step",
+                "data": [{
+                    "x": -5,
+                    "y": -5
+                }, {
+                    "x": -3,
+                    "y": -5
+                }, {
+                    "x": -1,
+                    "y": -5
+                }, {
+                    "x": 1,
+                    "y": 5
+                }, {
+                    "x": 3,
+                    "y": 5
+                }, {
+                    "x": 5,
+                    "y": 5
+                }, {
+                    "x": 7,
+                    "y": 5
+                }]
+},
+{
+                "label": "line",
+                "data": [{
+                    "x": -5,
+                    "y": -5
+                }, {
+                    "x": -3,
+                    "y": -3
+                }, {
+                    "x": -1,
+                    "y": -1
+                }, {
+                    "x": 1,
+                    "y": 1
+                }, {
+                    "x": 3,
+                    "y": 3
+                }, {
+                    "x": 5,
+                    "y": 5
+                }, {
+                    "x": 7,
+                    "y": 7
+                }]
+}
+]
+
+    var availableTags = new Set();
+    var unplottedTags = new Set();
+
+    function split( val ) {
+      return val.split( /,\s*/ );
+    }
+
+    if( rxData.constructor === Array )
+    {
+        for( var i = 0; i < rxData.length; i++ )
+	    {
+		    availableTags.add( rxData[i].label );
+            unplottedTags.add( rxData[i].label );
+		    availableScatterData[ rxData[i].label ] = rxData[i];
+	    }
+    }
+    else 
+    {
+	    availableTags.add( rxData.label );
+	    unplottedTags.add( rxData.label );
+	    
+	    availableScatterData[ rxData.label ] = rxData;
+    }
+
+    window.onload = function() {
+        var ctx = document.getElementById("canvas").getContext("2d");
+        window.myScatter = Chart.Scatter(ctx, {
+            data: scatterChartData,
+            options: {
+                title: {
+                    display: true,
+                    text: 'Event Parameters'
+                },
+            }
+        });
+    };
+
+    function getTagArray( tagText ) {
+
+        var stripped = tagText.toString().replace( /\s/g, "" )
+        //var cleaned = stripped.replace( /,/g, ", " )
+        var splitTags = stripped.split( "," );
+    
+        return splitTags
+    }
+    
+    function tagInput() {
+        var tagText = document.getElementById("tags").value
+        console.log( "tagInput(): " + tagText )
+        console.log( "tags length: " + tagText.length )
+    };
+
+	tagInput.priorLength = 0
+
+    var substringMatcher = function(strs) {
+        return function findMatches(q, cb) {
+              var matches, substringRegex;
+
+              // an array that will be populated with substring matches
+              matches = [];
+
+              // regex used to determine if a string contains the substring `q`
+              substrRegex = new RegExp(q, 'i');
+
+              // iterate through the pool of strings and for any string that
+              // contains the substring `q`, add it to the `matches` array
+              $.each(strs, function(i, str) {
+                if (substrRegex.test(str)) {
+                  matches.push(str);
+                }
+              });
+
+            cb(matches);
+        };
+    };
+
+function extractor(query) {
+    var result = /([^,]+)$/.exec(query);
+    if(result && result[1])
+        return result[1].trim();
+    return '';
+}
+
+console.log( unplottedTags )
+
+var selectTags = [];
+for (let tag of unplottedTags)
+{
+    var selectObj = { id: selectTags.length, text: tag };
+    selectTags.push( selectObj );
+}
+
+console.log( selectTags )
+
+
+//$(document).ready(function() {
+$(".tagstypeahead").select2({
+  data: selectTags
+});
+
+//});
+
+$('.tagstypeahead').on("select2:select", function(e) { 
+    //Do stuff
+    console.log( e.params.data )
+
+    var dataToAdd = availableScatterData[ e.params.data.text ]
+    
+    if ( !dataToAdd.hasOwnProperty( 'backgroundColor' ) )
+      {
+      var colors = getRandomColorTwoOpacity(); 
+      dataToAdd.backgroundColor = colors[0];
+      dataToAdd.borderColor = colors[1];
+      dataToAdd.showLine = true;
+      dataToAdd.lineTension = 0;
+      dataToAdd.fill = false;
+    }
+
+    scatterChartData.datasets.push( availableScatterData[ e.params.data.text ] );
+      
+    window.myScatter.update();
+
+});
+$('.tagstypeahead').on("select2:unselect", function(e) { 
+    //Do stuff
+    console.log( e.params.data )
+
+    const index = scatterChartData.datasets.indexOf( availableScatterData[ e.params.data.text ] );
+    
+    if (index !== -1) {
+        scatterChartData.datasets.splice(index, 1);
+        window.myScatter.update();
+    }
+});
+
+    function getRandomColorTwoOpacity() {
+
+        var red = Math.floor( Math.random() * 255 )
+        var green = Math.floor( Math.random() * 255 )
+        var blue = Math.floor( Math.random() * 255 )
+
+        var base = 'rgba(' + red + ',' + green + ',' + blue + ','
+
+        return [ base + ' 1.0 )', base + ' 0.2 )'];
+    }
+
+
+	</script>
+		</div>
+	</div>
+</div>
+
+  </body>
+</html>
