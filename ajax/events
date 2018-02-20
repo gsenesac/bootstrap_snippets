@@ -1,0 +1,14 @@
+{
+  "data": [
+{
+   "etype": "Snapshot",
+   "datetime": "2018-02-19T09:13:00",
+   "file": "snapshot_2018-02-19T09:13:00.event"
+},
+{
+   "etype": "Error",
+   "datetime": "2018-02-19T09:16:00",
+   "file": "error_2018-02-19T09:16:00.event"
+}
+    ]
+}
